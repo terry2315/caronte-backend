@@ -8,6 +8,17 @@ import router from './routes/user.js';
 
 const app = express();
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://caronte-backend.onrender.com',
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(cors({
     origin: process.env.CLIENT_URL,
     credentials: true
