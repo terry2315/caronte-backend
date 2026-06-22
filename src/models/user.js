@@ -14,17 +14,23 @@ const UserSchema = new Schema(
 
         lastName: {
             type: String,
-            required: [true, 'El apellido es obligatorio'],
+            required: function () {
+                return this.authProvider === 'local';
+            },
             trim: true,
             minlength: [2, 'El apellido debe tener al menos 2 caracteres'],
-            maxlength: [50, 'El apellido no puede superar los 50 caracteres']
+            maxlength: [50, 'El apellido no puede superar los 50 caracteres'],
+            default: ''
         },
 
         age: {
             type: Number,
-            required: [true, 'La edad es obligatoria'],
+            required: function () {
+                return this.authProvider === 'local';
+            },
             min: [1, 'La edad mínima es 1'],
-            max: [120, 'La edad máxima es 120']
+            max: [120, 'La edad máxima es 120'],
+            default: null
         },
 
         email: {
@@ -41,25 +47,63 @@ const UserSchema = new Schema(
 
         phone: {
             type: String,
-            required: [true, 'El teléfono es obligatorio'],
+            required: function () {
+                return this.authProvider === 'local';
+            },
             trim: true,
             match: [
                 /^\+?[0-9\s-]{7,20}$/,
                 'El teléfono no tiene un formato válido'
-            ]
+            ],
+            default: ''
         },
 
         passwordHash: {
             type: String,
-            required: [true, 'La contraseña es obligatoria'],
+            required: function () {
+                return this.authProvider === 'local';
+            },
             select: false
         },
 
         nationality: {
             type: String,
-            required: [true, 'La nacionalidad es obligatoria'],
+            required: function () {
+                return this.authProvider === 'local';
+            },
             trim: true,
-            maxlength: [60, 'La nacionalidad no puede superar los 60 caracteres']
+            maxlength: [60, 'La nacionalidad no puede superar los 60 caracteres'],
+            default: ''
+        },
+
+        authProvider: {
+            type: String,
+            enum: ['local', 'google'],
+            default: 'local'
+        },
+
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
+            trim: true
+        },
+
+        avatar: {
+            type: String,
+            default: ''
+        },
+
+        isEmailVerified: {
+            type: Boolean,
+            default: false
+        },
+
+        profileCompleted: {
+            type: Boolean,
+            default: function () {
+                return this.authProvider === 'local';
+            }
         },
 
         role: {
@@ -82,10 +126,9 @@ const UserSchema = new Schema(
 UserSchema.set('toJSON', {
     transform: (doc, ret) => {
         delete ret.passwordHash;
+        delete ret.googleId;
         return ret;
     }
 });
 
 export default mongoose.model('User', UserSchema, 'user');
-
-
