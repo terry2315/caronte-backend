@@ -14,12 +14,9 @@ const connectDB = async () => {
 
         await mongoose.connect(mongoURI);
 
-        console.log('MongoDB host:', mongoose.connection.host);
-        console.log('MongoDB database:', mongoose.connection.name);
-
         return {
             status: true,
-            message: 'base de datos conectada exitosamente 🟢'
+            message: '📊  Base de datos conectada exitosamente 🟢'
         };
     } catch (error) {
         return {

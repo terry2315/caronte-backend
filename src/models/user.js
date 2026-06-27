@@ -39,6 +39,7 @@ const UserSchema = new Schema(
             unique: true,
             lowercase: true,
             trim: true,
+            index: true,
             match: [
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 'El email no tiene un formato válido'

@@ -24,7 +24,7 @@ console.log(dbconnection.message);
 
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo exitosamente en el puerto ${PORT} 🟢 !!`);
+    console.log(`📤  Servidor corriendo exitosamente en el puerto ${PORT} 🟢 !!`);
 });
 
 export default app;

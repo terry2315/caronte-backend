@@ -1,64 +1,87 @@
+
+
+/*
+Recibir email y password desde req.body.
+Validar que ambos datos existan.
+Buscar el usuario en MongoDB por email.
+Verificar si existe.
+Comparar la contraseña recibida con la contraseña encriptada usando bcrypt.compare().
+Si todo está bien, responder con los datos seguros del usuario.
+Más adelante, generar un token JWT para mantener la sesión.
+*/
+
+/*
+1. Usuario hace login.
+2. Backend valida email/password.
+3. Backend responde con token.
+4. Frontend guarda el token.
+5. Frontend envía ese token en cada petición privada.
+6. Backend verifica el token con un middleware.
+7. Si el token es válido, permite acceso.
+*/
+
 import bcrypt from 'bcrypt';
 import User from '../models/user.js';
+import { generateToken } from '../utils/generateToken.js';
+
 
 export const validateLogin = async (req, res) => {
 
-    const { email, password } = req.body;
-
     try {
+
+        const { email, password } = req.body;
+
         if (!email || !password) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Debes ingresar los datos solicitados'
+            return res.status(401).json({
+                "status": "error",
+                "message": "Debes ingresar los datos de forma correcta"
             });
         }
 
-        const normalizedEmail = email.trim().toLowerCase();
+        const emailNormalized = email.trim().toLowerCase();
 
-        const user = await User.findOne({ email: normalizedEmail });
+        const user = await User.findOne({ email: emailNormalized }).select('+passwordHash');
 
         if (!user) {
             return res.status(401).json({
-                status: 'error',
-                message: 'Credenciales invalidas'
+                "status": "error",
+                "message": "Los datos ingresados son invalidos"
             });
         }
 
-        if (!user.password) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Esta cuenta fue creada con Google, Inicia sesion con Google.'
-            });
-        }
+        const isPasswordValidate = await bcrypt.compare(password, user.passwordHash);
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
+        if (!isPasswordValidate) {
             return res.status(401).json({
-                status: 'error',
-                message: 'Datos invalidos'
+                "status": "error",
+                "message": "Los datos ingresados son invalidos"
             });
         }
+
+        const token = generateToken(user);
 
         return res.status(200).json({
-            status: 'success',
-            message: 'Login exitoso',
+            status: "success",
+            message: "Login exitoso",
+            token,
             user: {
-                is: user._id,
+                id: user._id,
                 name: user.name,
                 lastName: user.lastName,
                 email: user.email,
                 role: user.role,
-                profiledCompleted: user.profileCompleted,
+                profileCompleted: user.profileCompleted,
                 authProvider: user.authProvider
             }
         });
 
+
+
+
     } catch (error) {
-        console.log('Error al intentar conectar con la base de datos', error);
         return res.status(500).json({
-            status: 'error',
-            messagge: 'error al buscar articulo'
+            "status": "error",
+            "message": "Error al intentar conectar con la base de datos"
         });
     }
 
