@@ -23,6 +23,7 @@ Más adelante, generar un token JWT para mantener la sesión.
 import bcrypt from 'bcrypt';
 import User from '../models/user.js';
 import { generateToken } from '../utils/generateToken.js';
+import { authCookieOptions } from '../config/cookieOptions.js';
 
 
 export const validateLogin = async (req, res) => {
@@ -59,6 +60,8 @@ export const validateLogin = async (req, res) => {
         }
 
         const token = generateToken(user);
+
+        res.cookie('accessToken', token, authCookieOptions);
 
         return res.status(200).json({
             status: "success",

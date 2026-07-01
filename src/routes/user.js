@@ -2,13 +2,14 @@ import express from 'express';
 import createNewUser, { loginWithGoogle } from '../controller/user.js';
 import { validateLogin } from '../controller/login.js'
 import { authRequired } from '../middlewares/authrequired.js';
+import { authMiddleware } from '../middlewares/authMiddlewares.js';
 
 const router = express.Router();
 
-router.get('/profile', authRequired, (req, res) => {
+router.get('/profile', authRequired, authMiddleware, (req, res) => {
     return res.status(200).json({
         status: 'success',
-        message: 'Acceso autorizado a ruta privada',
+        message: 'Perfil obtenido correctamente',
         user: req.user
     });
 });
