@@ -1,34 +1,33 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 
-
 export const authMiddleware = async (req, res, next) => {
 
     try {
-        const token = req.cookies.accessToken;
+        const token = req.cookies?.accessToken;
 
         if (!token) {
             return res.status(401).json({
                 status: 'error',
-                message: 'No autorizado'
+                message: 'Token no proporcionado'
             });
         }
 
-        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decode.id).select('-password');
+        if (!decoded.id) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Token inválido: no contiene id de usuario'
+            });
+        }
+
+        const user = await User.findById(decoded.id).select('-password');
 
         if (!user) {
-            return res.staus(401).json({
+            return res.status(401).json({
                 status: 'error',
-                message: 'Usuari no encontrado'
-            });
-        }
-
-        if (user.isActive === false) {
-            return res.status(403).json({
-                status: 'error',
-                message: 'Cuenta desactivada'
+                message: 'Usuario no encontrado'
             });
         }
 
@@ -39,8 +38,7 @@ export const authMiddleware = async (req, res, next) => {
     } catch (error) {
         return res.status(401).json({
             status: 'error',
-            message: 'Sesion invalida o expirada'
+            message: 'Token inválido o expirado'
         });
-    };
-
-}
+    }
+};
