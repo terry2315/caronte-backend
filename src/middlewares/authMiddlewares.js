@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 
 export const authMiddleware = async (req, res, next) => {
-
     try {
         const token = req.cookies?.accessToken;
 
@@ -13,16 +12,20 @@ export const authMiddleware = async (req, res, next) => {
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
         if (!decoded.id) {
             return res.status(401).json({
                 status: 'error',
-                message: 'Token inválido: no contiene id de usuario'
+                message:
+                    'Token inválido: no contiene id de usuario'
             });
         }
 
-        const user = await User.findById(decoded.id).select('-password');
+        const user = await User.findById(decoded.id);
 
         if (!user) {
             return res.status(401).json({
@@ -31,14 +34,27 @@ export const authMiddleware = async (req, res, next) => {
             });
         }
 
+        if (!user.isActive) {
+            return res.status(403).json({
+                status: 'error',
+                message: 'La cuenta está desactivada'
+            });
+        }
+
         req.user = user;
 
-        next();
-
+        return next();
     } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                status: 'error',
+                message: 'La sesión ha expirado'
+            });
+        }
+
         return res.status(401).json({
             status: 'error',
-            message: 'Token inválido o expirado'
+            message: 'Token inválido'
         });
     }
 };

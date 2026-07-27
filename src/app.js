@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import router from './routes/user.js';
+import userRouter from './routes/user.js';
+import vehicleRouter from './routes/vehicles.js';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
     });
 });
 
-app.use('/', router);
+app.use('/api', userRouter);
+app.use('/api/vehicles', vehicleRouter);
 
 export default app;
