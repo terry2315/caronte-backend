@@ -11,6 +11,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
     'http://localhost:5173',
     'https://caronte-client.vercel.app',
+    'https://carontenode11.vercel.app',
     process.env.CLIENT_URL,
 ].filter(Boolean);
 
